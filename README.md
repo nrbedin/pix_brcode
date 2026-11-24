@@ -79,6 +79,23 @@ Use `--help` para ver todas as opções (`--txid`, `--description`, `--cep`, `--
 
 [`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → pago, expirado ou erro. Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`.
 
+## Desenvolvimento
+
+O projeto fixa a versão do Flutter (e do Dart que vem com ele) em `.fvmrc`, usando o [FVM](https://fvm.app). Os comandos ficam no `Makefile`:
+
+```bash
+make setup            # instala o Flutter do .fvmrc e baixa as dependências
+make check            # formatação, análise e testes do pacote e do app (o mesmo que o CI)
+make cli ARGS="--key fulano@exemplo.com --amount 10.50"
+make app-run          # app em debug no Chrome (DEVICE=<id> para outro aparelho)
+make app-serve-web    # release web em http://localhost:8080
+make app-install-apk  # release Android no aparelho ou emulador conectado
+```
+
+O build Android usa o JDK 17 só no Gradle deste app (`brew install openjdk@17`), porque o Gradle do Flutter 3.27 não roda com o JDK 25 do Android Studio. Outro caminho pode ser passado com `ANDROID_JDK=...`.
+
+Rode `make` para ver todos os comandos. No VS Code, `.vscode/settings.json` já aponta a extensão Dart para o SDK do FVM.
+
 ## Licença
 
 MIT

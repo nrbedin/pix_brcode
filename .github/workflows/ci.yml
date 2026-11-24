@@ -6,31 +6,20 @@ on:
   pull_request:
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
-      - run: dart format --output=none --set-exit-if-changed .
-      - run: dart analyze --fatal-infos
-      - run: dart test
 
-  flutter-example:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: example/flutter_app
-    steps:
-      - uses: actions/checkout@v5
+      # Usa a mesma versão do Flutter que o FVM fixa em .fvmrc.
+      - name: Lê a versão do Flutter do .fvmrc
+        run: echo "FLUTTER_VERSION=$(jq -r .flutter .fvmrc)" >> "$GITHUB_ENV"
+
       - uses: subosito/flutter-action@v2
         with:
-          # Mesma versão usada no desenvolvimento local. A partir do 3.47,
-          # material.dart passa a ser deprecated em favor de material_ui;
-          # migrar junto com a atualização local do Flutter.
-          flutter-version: 3.27.1
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
+
+      - run: make deps FVM=
+      - run: make check FVM=
