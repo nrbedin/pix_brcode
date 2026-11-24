@@ -11,10 +11,10 @@ APP_DIR := example/flutter_app
 DEVICE ?= chrome
 PORT ?= 8080
 
-# JDK usado só pelo Gradle do app Android. O Gradle 8.3 do template do
-# Flutter 3.27 não roda com o JDK 25 que vem no Android Studio, então o
-# daemon do Gradle roda com o JDK 17 (brew install openjdk@17). Não altera
-# o Java do sistema nem a configuração global do Flutter.
+# JDK usado só pelo Gradle do app Android. O Gradle 8.10 do app não roda
+# com o JDK 25 que vem no Android Studio, então o daemon do Gradle roda com
+# o JDK 17 (brew install openjdk@17). Não altera o Java do sistema nem a
+# configuração global do Flutter.
 ANDROID_JDK ?= /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
 ANDROID_ENV := GRADLE_OPTS="-Dorg.gradle.java.home=$(ANDROID_JDK)"
 

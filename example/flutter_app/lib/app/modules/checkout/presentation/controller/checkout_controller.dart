@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:pix_brcode/pix_brcode.dart';
 
 import '../../../../core/formatters/currency_formatter.dart';
+import '../../../../core/share/qr_image_renderer.dart';
+import '../../../../core/share/share_service.dart';
 import '../../data/datasources/pix_datasource.dart';
 import '../../domain/entities/charge_event.dart';
 import '../../domain/entities/pix_charge.dart';
@@ -21,10 +24,19 @@ class CheckoutController {
   /// Cria o controller.
   ///
   /// [simulator] só existe na demonstração, para o botão de simular o
-  /// pagamento.
-  CheckoutController(this._repository, this.store, {this.simulator});
+  /// pagamento. Sem [shareService], o botão de compartilhar some.
+  CheckoutController(
+    this._repository,
+    this.store, {
+    this.simulator,
+    ShareService? shareService,
+    QrImageRenderer renderer = const QrImageRenderer(),
+  })  : _shareService = shareService,
+        _renderer = renderer;
 
   final CheckoutRepository _repository;
+  final ShareService? _shareService;
+  final QrImageRenderer _renderer;
 
   /// Estado observável da tela.
   final CheckoutStore store;
@@ -167,6 +179,43 @@ class CheckoutController {
     final current = store.state;
     if (current is AwaitingPayment) {
       simulator?.simulatePayment(current.charge.txid);
+    }
+  }
+
+  /// Se dá para compartilhar o QR como imagem.
+  bool get canShare => _shareService != null;
+
+  /// Compartilha o QR da cobrança na tela como PNG, com o "copia e cola" no
+  /// texto, para quem recebe pagar pelo celular sem precisar escanear.
+  ///
+  /// [origin] é a área do botão, usada pelo iPad. Devolve `false` se não
+  /// conseguiu abrir o compartilhamento.
+  Future<bool> shareQr({Rect? origin}) async {
+    final current = store.state;
+    final shareService = _shareService;
+    if (current is! AwaitingPayment || shareService == null) return false;
+
+    final charge = current.charge;
+    final payload = current.payload;
+    final amount = formatBrl(charge.amount);
+    try {
+      final png = await _renderer.renderPng(
+        data: charge.brCode,
+        title: amount,
+        subtitle: 'para ${payload.merchantName} · ${payload.merchantCity}',
+      );
+      await shareService.shareImage(
+        png: png,
+        fileName: 'pix-${charge.txid}.png',
+        text: 'Pix de $amount para ${payload.merchantName}.\n'
+            'Pix copia e cola:\n${charge.brCode}',
+        origin: origin,
+      );
+      return true;
+    } on Exception {
+      // PlatformException do plugin ou falha ao gerar a imagem: a tela
+      // avisa e o QR continua lá.
+      return false;
     }
   }
 

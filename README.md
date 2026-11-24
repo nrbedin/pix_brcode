@@ -10,7 +10,7 @@ Gera, interpreta e valida payloads **Pix BR Code** (padrão EMV QRCPS) em Dart p
 - **Interpretar** uma string em um objeto tipado, com `PixParseException` indicando o campo inválido.
 - **CRC16-CCITT** (polinômio `0x1021`, valor inicial `0xFFFF`) para gerar e validar.
 - **Validar** tamanhos de campo, caracteres permitidos e formato da chave (e-mail, telefone, CPF/CNPJ, EVP).
-- **Exemplos**: CLI (`dart run example/main.dart --key ... --amount 10.50`) e app Flutter mínimo com `qr_flutter`.
+- **Exemplos**: CLI (`dart run example/main.dart --key ... --amount 10.50`) e app Flutter que gera, compartilha e lê QR Codes Pix.
 
 Todos os dados usados em testes e exemplos são fictícios.
 
@@ -77,7 +77,7 @@ Use `--help` para ver todas as opções (`--txid`, `--description`, `--cep`, `--
 
 ## App Flutter de exemplo
 
-[`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, em flutter_modular + MobX e com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → etapas do pagamento → comprovante (ou expirado / erro). Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`.
+[`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, em flutter_modular + MobX e com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → etapas do pagamento → comprovante (ou expirado / erro). Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`. O QR pode ser compartilhado como imagem, e a tela **Ler QR Code Pix** lê um BR Code pela câmera ou colado, mostrando os dados, os campos EMV e, se for inválido, o campo e a posição do erro.
 
 ## Desenvolvimento
 
@@ -92,7 +92,7 @@ make app-serve-web    # release web em http://localhost:8080
 make app-install-apk  # release Android no aparelho ou emulador conectado
 ```
 
-O build Android usa o JDK 17 só no Gradle deste app (`brew install openjdk@17`), porque o Gradle do Flutter 3.27 não roda com o JDK 25 do Android Studio. Outro caminho pode ser passado com `ANDROID_JDK=...`.
+O build Android usa o JDK 17 só no Gradle deste app (`brew install openjdk@17`), porque o Gradle 8.10 do app não roda com o JDK 25 do Android Studio. Outro caminho pode ser passado com `ANDROID_JDK=...`.
 
 Rode `make` para ver todos os comandos. No VS Code, `.vscode/settings.json` já aponta a extensão Dart para o SDK do FVM.
 
