@@ -1,8 +1,9 @@
 # pix_checkout_demo
 
 App Flutter que mostra **um pagamento Pix do lado do front**, na estrutura
-**flutter_modular 5 + MobX**. Usa [`pix_brcode`](../..) para validar o BR Code
-e [`qr_flutter`](https://pub.dev/packages/qr_flutter) para desenhar o QR.
+**flutter_modular 5 + MobX**. Usa [`pix_brcode`](../..) para validar o BR Code,
+[`qr_flutter`](https://pub.dev/packages/qr_flutter) para desenhar o QR e
+[`share_plus`](https://pub.dev/packages/share_plus) para compartilhá-lo.
 
 O backend é **simulado** (`FakePixDatasource`): responde em JSON com os nomes
 de campo da API Pix do Bacen e, quando você toca em "Simular pagamento no
@@ -22,7 +23,7 @@ make codegen           # depois de mudar um store MobX
 ## Fluxo
 
 ```
-Valor → Gerando cobrança → QR (copia e cola + contagem) → Processando (etapas) → Comprovante
+Valor → Gerando cobrança → QR (copiar, compartilhar, contagem) → Processando (etapas) → Comprovante
               └→ Erro (tentar de novo)        └→ Expirado (gerar novo QR)
 ```
 
@@ -37,6 +38,17 @@ Na vida real, o app de quem cobra só recebe a última. As outras aparecem para
 mostrar o que acontece entre os bancos. Depois que o processamento começa, a
 contagem para e não dá mais para cancelar.
 
+## Compartilhar o QR
+
+"Compartilhar QR Code" abre a folha de compartilhamento do sistema com um PNG
+(QR com margem branca, valor e recebedor) e, no texto, o "copia e cola". Assim
+quem recebe pelo WhatsApp, por exemplo, consegue pagar pelo próprio celular
+sem precisar escanear. No navegador sem Web Share API, o PNG é baixado.
+
+O PNG é desenhado fora da árvore de widgets (`QrPainter` num `Canvas`), então
+sai do mesmo tamanho em qualquer tela. O `ShareService` isola o plugin, e os
+testes usam um falso.
+
 ## Estrutura
 
 ```
@@ -46,6 +58,7 @@ lib/
     app_module.dart              registra o backend (PixDatasource) e as rotas
     app_widget.dart              MaterialApp.router com o Modular
     core/formatters/             R$ 10,50, data e hora
+    core/share/                  QrImageRenderer (PNG) e ShareService (share_plus)
     modules/checkout/
       checkout_module.dart       rota '/'
       checkout_binds.dart        repositório, store e controller
