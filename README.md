@@ -60,6 +60,21 @@ try {
 
 O parser confere CRC16, versão, GUI `br.gov.bcb.pix`, moeda `986`, país `BR` e as mesmas regras do gerador. Campos desconhecidos são ignorados. Use `PixPayload.tryParse` para receber `null` em vez da exceção.
 
+## Exemplo de linha de comando
+
+```bash
+# Gerar BR Code estático (nome e cidade têm valores fictícios por padrão)
+dart run example/main.dart --key 123e4567-e12b-12d1-a456-426655440000 --amount 10.50
+
+# Gerar BR Code dinâmico
+dart run example/main.dart --url pix.exemplo.com.br/qr/v2/abc123 --name "Loja Exemplo" --city "Curitiba"
+
+# Ler um BR Code
+dart run example/main.dart --parse "00020126580014br.gov.bcb.pix0136..."
+```
+
+Use `--help` para ver todas as opções (`--txid`, `--description`, `--cep`, `--single-use`).
+
 ## App Flutter de exemplo
 
 [`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → pago, expirado ou erro. Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`.
