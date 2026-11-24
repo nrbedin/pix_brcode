@@ -92,7 +92,7 @@ make app-serve-web    # release web em http://localhost:8080
 make app-install-apk  # release Android no aparelho ou emulador conectado
 ```
 
-O build Android usa o JDK 17 só no Gradle deste app (`brew install openjdk@17`), porque o Gradle do Flutter 3.27 não roda com o JDK 25 do Android Studio. Outro caminho pode ser passado com `ANDROID_JDK=...`.
+O build Android usa o JDK 17 só no Gradle deste app (`brew install openjdk@17`), porque o Gradle 8.10 do app não roda com o JDK 25 do Android Studio. Outro caminho pode ser passado com `ANDROID_JDK=...`.
 
 Rode `make` para ver todos os comandos. No VS Code, `.vscode/settings.json` já aponta a extensão Dart para o SDK do FVM.
 
