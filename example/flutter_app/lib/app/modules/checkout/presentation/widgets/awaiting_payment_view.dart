@@ -12,6 +12,7 @@ class AwaitingPaymentView extends StatelessWidget {
   const AwaitingPaymentView({
     required this.state,
     required this.onCancel,
+    this.onShare,
     this.onSimulatePayment,
     super.key,
   });
@@ -22,6 +23,10 @@ class AwaitingPaymentView extends StatelessWidget {
   /// Cancela a cobrança.
   final VoidCallback onCancel;
 
+  /// Compartilha o QR como imagem, recebendo a área do botão. Devolve
+  /// `false` se falhou. `null` esconde o botão.
+  final Future<bool> Function(Rect? origin)? onShare;
+
   /// Simula o pagamento. `null` esconde o botão.
   final VoidCallback? onSimulatePayment;
 
@@ -30,6 +35,18 @@ class AwaitingPaymentView extends StatelessWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Código Pix copiado')),
+    );
+  }
+
+  Future<void> _share(BuildContext buttonContext) async {
+    final box = buttonContext.findRenderObject() as RenderBox?;
+    final origin = box == null || !box.hasSize
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    final shared = await onShare!(origin);
+    if (shared || !buttonContext.mounted) return;
+    ScaffoldMessenger.of(buttonContext).showSnackBar(
+      const SnackBar(content: Text('Não deu para compartilhar o QR Code')),
     );
   }
 
@@ -84,6 +101,17 @@ class AwaitingPaymentView extends StatelessWidget {
           icon: const Icon(Icons.copy),
           label: const Text('Copiar código Pix'),
         ),
+        if (onShare != null) ...[
+          const SizedBox(height: 8),
+          Builder(
+            builder: (buttonContext) => OutlinedButton.icon(
+              key: const Key('share'),
+              onPressed: () => _share(buttonContext),
+              icon: const Icon(Icons.share),
+              label: const Text('Compartilhar QR Code'),
+            ),
+          ),
+        ],
         if (payload is DynamicPixPayload) ...[
           const SizedBox(height: 8),
           Text(

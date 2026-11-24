@@ -8,11 +8,14 @@ import 'package:pix_checkout_demo/app/modules/checkout/data/datasources/fake_pix
 import 'package:pix_checkout_demo/app/modules/checkout/domain/enums/payment_step.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import 'fakes/fake_share_service.dart';
+
 void main() {
   const latency = Duration(milliseconds: 100);
   const stepDelay = Duration(seconds: 1);
 
   late FakePixDatasource datasource;
+  late FakeShareService shareService;
   String? copied;
 
   setUp(() {
@@ -21,6 +24,7 @@ void main() {
       expiresIn: const Duration(seconds: 65),
       stepDelay: stepDelay,
     );
+    shareService = FakeShareService();
     copied = null;
   });
 
@@ -36,7 +40,7 @@ void main() {
     );
     await tester.pumpWidget(
       ModularApp(
-        module: AppModule(datasource: datasource),
+        module: AppModule(datasource: datasource, shareService: shareService),
         child: const AppWidget(),
       ),
     );
@@ -114,6 +118,49 @@ void main() {
 
     await tapVisible(tester, find.text('Nova cobrança'));
     expect(find.byKey(const Key('amount-form')), findsOneWidget);
+  });
+
+  testWidgets('compartilha o QR como imagem', (tester) async {
+    await pumpApp(tester);
+    await generate(tester, '7');
+
+    // O PNG é desenhado pelo engine, fora do relógio falso do teste.
+    await tester.ensureVisible(find.byKey(const Key('share')));
+    await tester.pump();
+    await tester.runAsync(() async {
+      await tester.tap(find.byKey(const Key('share')));
+      while (shareService.shared.isEmpty) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+
+    final shared = shareService.shared.single;
+    expect(shared.fileName, endsWith('.png'));
+    expect(shared.png.sublist(0, 4), [137, 80, 78, 71]);
+    expect(shared.text, contains(r'R$ 7,00'));
+    expect(shared.origin, isNotNull);
+
+    await tapVisible(tester, find.text('Cancelar'));
+  });
+
+  testWidgets('falha ao compartilhar avisa e mantém o QR', (tester) async {
+    shareService.failNext = true;
+    await pumpApp(tester);
+    await generate(tester, '7');
+
+    await tester.ensureVisible(find.byKey(const Key('share')));
+    await tester.pump();
+    await tester.runAsync(() async {
+      await tester.tap(find.byKey(const Key('share')));
+      while (shareService.failNext) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await tester.pump();
+    expect(find.text('Não deu para compartilhar o QR Code'), findsOneWidget);
+    expect(find.byKey(const Key('awaiting')), findsOneWidget);
+
+    await tapVisible(tester, find.text('Cancelar'));
   });
 
   testWidgets('QR expira e pode ser gerado de novo', (tester) async {

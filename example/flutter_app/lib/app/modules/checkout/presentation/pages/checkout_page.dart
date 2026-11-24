@@ -50,6 +50,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   final AwaitingPayment state => AwaitingPaymentView(
                       state: state,
                       onCancel: controller.cancel,
+                      onShare: controller.canShare
+                          ? (origin) => controller.shareQr(origin: origin)
+                          : null,
                       onSimulatePayment: controller.simulator == null
                           ? null
                           : controller.simulatePayment,

@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pix_brcode/pix_brcode.dart';
+import 'package:pix_checkout_demo/app/core/share/qr_image_renderer.dart';
 import 'package:pix_checkout_demo/app/modules/checkout/data/datasources/fake_pix_datasource.dart';
 import 'package:pix_checkout_demo/app/modules/checkout/data/repositories/checkout_repository_impl.dart';
 import 'package:pix_checkout_demo/app/modules/checkout/domain/entities/charge_event.dart';
@@ -15,6 +18,8 @@ import 'package:pix_checkout_demo/app/modules/checkout/domain/repositories/check
 import 'package:pix_checkout_demo/app/modules/checkout/presentation/controller/checkout_controller.dart';
 import 'package:pix_checkout_demo/app/modules/checkout/presentation/mobx/checkout_state.dart';
 import 'package:pix_checkout_demo/app/modules/checkout/presentation/mobx/checkout_store.dart';
+
+import '../../../fakes/fake_share_service.dart';
 
 /// Repositório em que o teste controla cada resposta.
 final class _ManualRepository implements CheckoutRepository {
@@ -30,6 +35,21 @@ final class _ManualRepository implements CheckoutRepository {
 
   @override
   Future<void> cancelCharge(String txid) async => cancelled.add(txid);
+}
+
+/// Renderizador que não desenha nada: o PNG de verdade é testado à parte.
+final class _StubRenderer extends QrImageRenderer {
+  final rendered = <String>[];
+
+  @override
+  Future<Uint8List> renderPng({
+    required String data,
+    required String title,
+    required String subtitle,
+  }) async {
+    rendered.add('$data|$title|$subtitle');
+    return Uint8List.fromList([1, 2, 3]);
+  }
 }
 
 String brCode({double? amount}) => DynamicPixPayload(
@@ -293,6 +313,70 @@ void main() {
     test('sem simulador, simulatePayment não faz nada', () async {
       await showQr();
       controller.simulatePayment();
+      expect(store.state, isA<AwaitingPayment>());
+    });
+  });
+
+  group('compartilhar QR', () {
+    late _ManualRepository repository;
+    late CheckoutStore store;
+    late FakeShareService shareService;
+    late _StubRenderer renderer;
+    late CheckoutController controller;
+
+    setUp(() {
+      repository = _ManualRepository();
+      store = CheckoutStore();
+      shareService = FakeShareService();
+      renderer = _StubRenderer();
+      controller = CheckoutController(
+        repository,
+        store,
+        shareService: shareService,
+        renderer: renderer,
+      );
+    });
+
+    tearDown(() => controller.dispose());
+
+    test('sem ShareService não dá para compartilhar', () {
+      final plain = CheckoutController(repository, CheckoutStore());
+      expect(plain.canShare, isFalse);
+      expect(controller.canShare, isTrue);
+    });
+
+    test('compartilha o PNG com o copia e cola no texto', () async {
+      final future = controller.createCharge(10.5);
+      repository.pending.complete(charge(txid: 'T9', amount: 10.5));
+      await future;
+
+      const origin = Rect.fromLTWH(10, 20, 100, 40);
+      expect(await controller.shareQr(origin: origin), isTrue);
+
+      final code = (store.state as AwaitingPayment).charge.brCode;
+      expect(renderer.rendered, [
+        '$code|R\$ 10,50|para Loja Exemplo · SAO PAULO',
+      ]);
+      final shared = shareService.shared.single;
+      expect(shared.png, [1, 2, 3]);
+      expect(shared.fileName, 'pix-T9.png');
+      expect(shared.text, contains(r'Pix de R$ 10,50 para Loja Exemplo'));
+      expect(shared.text, endsWith(code));
+      expect(shared.origin, origin);
+    });
+
+    test('sem QR na tela não compartilha', () async {
+      expect(await controller.shareQr(), isFalse);
+      expect(shareService.shared, isEmpty);
+    });
+
+    test('falha do plugin devolve false e mantém o QR', () async {
+      final future = controller.createCharge(5);
+      repository.pending.complete(charge());
+      await future;
+
+      shareService.failNext = true;
+      expect(await controller.shareQr(), isFalse);
       expect(store.state, isA<AwaitingPayment>());
     });
   });
