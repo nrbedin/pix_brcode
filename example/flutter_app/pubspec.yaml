@@ -1,0 +1,22 @@
+name: pix_checkout_demo
+description: App Flutter mínimo que mostra um fluxo de pagamento Pix com backend simulado, usando pix_brcode e qr_flutter.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  pix_brcode:
+    path: ../..
+  qr_flutter: ^4.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
