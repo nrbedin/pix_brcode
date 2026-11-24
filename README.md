@@ -75,6 +75,10 @@ dart run example/main.dart --parse "00020126580014br.gov.bcb.pix0136..."
 
 Use `--help` para ver todas as opções (`--txid`, `--description`, `--cep`, `--single-use`).
 
+## App Flutter de exemplo
+
+[`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → pago, expirado ou erro. Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`.
+
 ## Licença
 
 MIT

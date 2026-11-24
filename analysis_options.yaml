@@ -28,3 +28,9 @@ include: package:lints/recommended.yaml
 
 # For additional information about configuring this file, see
 # https://dart.dev/guides/language/analysis-options
+
+analyzer:
+  exclude:
+    # App Flutter de exemplo: tem pubspec próprio e é analisado no job do
+    # Flutter no CI.
+    - example/flutter_app/**
