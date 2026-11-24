@@ -2,8 +2,10 @@
 
 App Flutter que mostra **um pagamento Pix do lado do front**, na estrutura
 **flutter_modular 5 + MobX**. Usa [`pix_brcode`](../..) para validar o BR Code,
-[`qr_flutter`](https://pub.dev/packages/qr_flutter) para desenhar o QR e
-[`share_plus`](https://pub.dev/packages/share_plus) para compartilhá-lo.
+[`qr_flutter`](https://pub.dev/packages/qr_flutter) para desenhar o QR,
+[`share_plus`](https://pub.dev/packages/share_plus) para compartilhá-lo e
+[`mobile_scanner`](https://pub.dev/packages/mobile_scanner) para ler QR Codes
+pela câmera.
 
 O backend é **simulado** (`FakePixDatasource`): responde em JSON com os nomes
 de campo da API Pix do Bacen e, quando você toca em "Simular pagamento no
@@ -49,6 +51,30 @@ O PNG é desenhado fora da árvore de widgets (`QrPainter` num `Canvas`), então
 sai do mesmo tamanho em qualquer tela. O `ShareService` isola o plugin, e os
 testes usam um falso.
 
+## Ler um QR Code Pix
+
+O ícone de leitor na barra abre **Ler QR Code Pix** (`ReaderModule`, rota
+`/reader`). Dá para escanear com a câmera ou colar o "copia e cola". Se o
+código for válido, a tela mostra:
+
+- o tipo (estático reutilizável ou de uso único, ou dinâmico), o valor, o
+  recebedor e a chave ou a URL da cobrança;
+- os **campos EMV** em árvore (`26` → `26.01 Chave Pix`, `62` → `62.05 txid`…).
+
+Se for inválido, mostra a mensagem do `PixParseException` com o campo
+(`Campo 63: CRC inválido…`) e marca no código a posição do erro.
+
+Câmera:
+
+- **Android:** minSdk 23 (Android 6), exigido pelo CameraX. O modelo do ML Kit
+  vai dentro do APK (cerca de 68 MB, somando todas as arquiteturas), então lê
+  offline desde a primeira vez. Para um APK por arquitetura, use
+  `flutter build apk --split-per-abi`.
+- **iOS:** `NSCameraUsageDescription` no `Info.plist`.
+- **Web:** precisa de HTTPS (ou `localhost`) para o navegador liberar a
+  câmera.
+- Sem permissão ou sem câmera, a tela explica e dá para voltar e colar.
+
 ## Estrutura
 
 ```
@@ -74,6 +100,16 @@ lib/
         controller/              CheckoutController: regras e transições
         mobx/                    CheckoutStore (@observable, @computed) e estados
         pages/ widgets/          tela com Observer + switch sobre o estado
+    modules/reader/
+      reader_module.dart         rotas '/reader/' e '/reader/scan'
+      reader_binds.dart          store e controller
+      domain/
+        entities/                BrCodeReading, BrCodeField (árvore de campos)
+        services/                BrCodeInspector: pix_brcode + nomes dos campos
+      presentation/
+        controller/ mobx/        ReaderController, ReaderStore e estados
+        pages/                   ReaderPage (colar/ler) e ScanPage (câmera)
+        widgets/                 resumo, campos EMV e erro com a posição
 ```
 
 - **Store × controller:** o `CheckoutStore` só guarda o estado observável; o

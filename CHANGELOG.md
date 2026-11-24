@@ -11,3 +11,4 @@
 - App Flutter de exemplo em `example/flutter_app`: fluxo de pagamento Pix com backend simulado, validação do BR Code e QR com `qr_flutter`.
 - App Flutter de exemplo reestruturado em flutter_modular 5 + MobX (data/domain/presentation), com backend fake em JSON no formato da API Pix, etapas do pagamento e comprovante.
 - App de exemplo: compartilhar o QR como imagem PNG (com valor, recebedor e o copia e cola no texto) usando `share_plus`.
+- App de exemplo: tela para ler BR Code pela câmera (`mobile_scanner`) ou colando, com resumo, árvore dos campos EMV e o campo e a posição do erro quando inválido.

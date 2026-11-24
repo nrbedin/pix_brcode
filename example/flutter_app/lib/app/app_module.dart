@@ -4,6 +4,7 @@ import 'core/share/share_service.dart';
 import 'modules/checkout/checkout_module.dart';
 import 'modules/checkout/data/datasources/fake_pix_datasource.dart';
 import 'modules/checkout/data/datasources/pix_datasource.dart';
+import 'modules/reader/reader_module.dart';
 
 /// Módulo raiz.
 ///
@@ -30,5 +31,6 @@ class AppModule extends Module {
   @override
   List<ModularRoute> get routes => [
         ModuleRoute('/', module: CheckoutModule()),
+        ModuleRoute('/reader', module: ReaderModule()),
       ];
 }

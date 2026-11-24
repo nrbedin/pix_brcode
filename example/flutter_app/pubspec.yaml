@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   flutter_mobx: ^2.3.0
   flutter_modular: ^5.0.3
+  mobile_scanner: ^6.0.11
   mobx: ^2.5.0
   pix_brcode:
     path: ../..
