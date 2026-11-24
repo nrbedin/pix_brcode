@@ -15,3 +15,22 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed .
       - run: dart analyze --fatal-infos
       - run: dart test
+
+  flutter-example:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/flutter_app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          # Mesma versão usada no desenvolvimento local. A partir do 3.47,
+          # material.dart passa a ser deprecated em favor de material_ui;
+          # migrar junto com a atualização local do Flutter.
+          flutter-version: 3.27.1
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test

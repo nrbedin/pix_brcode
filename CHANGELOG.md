@@ -8,3 +8,4 @@
 - `StaticPixPayload` e `DynamicPixPayload`: geração do BR Code estático (chave, valor, descrição, txid, CEP, uso único) e dinâmico (URL de cobrança), com validação de tamanhos e caracteres.
 - `PixPayload.parse` e `tryParse`: leitura do BR Code em `StaticPixPayload` ou `DynamicPixPayload`, com `PixParseException` indicando campo e posição.
 - Exemplo de linha de comando em `example/main.dart` para gerar e ler BR Codes.
+- App Flutter de exemplo em `example/flutter_app`: fluxo de pagamento Pix com backend simulado, validação do BR Code e QR com `qr_flutter`.
