@@ -1,6 +1,8 @@
 import 'crc16.dart';
 import 'emv_tlv.dart';
 import 'pix_key.dart';
+import 'pix_parse_exception.dart';
+import 'pix_parser.dart';
 
 /// IDs dos campos EMV usados pelo BR Code.
 abstract final class PixFieldId {
@@ -80,6 +82,27 @@ sealed class PixPayload {
         ),
         postalCode = _postalCode(postalCode) {
     _checkAmount(amount);
+  }
+
+  /// Interpreta um BR Code Pix (o texto do "Pix Copia e Cola").
+  ///
+  /// Devolve um [StaticPixPayload] quando o template 26 tem chave e um
+  /// [DynamicPixPayload] quando tem URL. Confere o CRC16, a versão, o GUI, a
+  /// moeda (`986`), o país (`BR`) e as mesmas regras dos construtores.
+  /// Campos desconhecidos são ignorados.
+  ///
+  /// Lança [PixParseException] com o caminho do campo inválido em
+  /// [PixParseException.field] (por exemplo `'26.01'`) e a posição em
+  /// [PixParseException.offset].
+  static PixPayload parse(String input) => parsePixPayload(input);
+
+  /// Como [parse], mas devolve `null` em vez de lançar exceção.
+  static PixPayload? tryParse(String input) {
+    try {
+      return parse(input);
+    } on PixParseException {
+      return null;
+    }
   }
 
   /// GUI do arranjo Pix no template 26.
