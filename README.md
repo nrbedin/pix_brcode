@@ -42,6 +42,24 @@ void main() {
 
 Campos inválidos lançam `ArgumentError` com o nome do parâmetro e o motivo.
 
+### Ler um BR Code
+
+```dart
+try {
+  final payload = PixPayload.parse(copiaECola);
+  switch (payload) {
+    case StaticPixPayload(:final key, :final amount):
+      print('Chave ${key.type.name}: ${key.value}, valor: ${amount ?? 'livre'}');
+    case DynamicPixPayload(:final url):
+      print('Cobrança em https://$url');
+  }
+} on PixParseException catch (e) {
+  print(e); // PixParseException (campo 26.01): chave Pix inválida: ... (posição 22)
+}
+```
+
+O parser confere CRC16, versão, GUI `br.gov.bcb.pix`, moeda `986`, país `BR` e as mesmas regras do gerador. Campos desconhecidos são ignorados. Use `PixPayload.tryParse` para receber `null` em vez da exceção.
+
 ## Licença
 
 MIT
