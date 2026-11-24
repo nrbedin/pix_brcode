@@ -77,7 +77,7 @@ Use `--help` para ver todas as opções (`--txid`, `--description`, `--cep`, `--
 
 ## App Flutter de exemplo
 
-[`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → pago, expirado ou erro. Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`.
+[`example/flutter_app`](example/flutter_app) mostra o fluxo completo de um pagamento Pix no front, em flutter_modular + MobX e com backend simulado: valor → cobrança → QR Code com "copia e cola" e contagem regressiva → etapas do pagamento → comprovante (ou expirado / erro). Antes de exibir o QR, o app valida o BR Code recebido com `PixPayload.parse`.
 
 ## Desenvolvimento
 
