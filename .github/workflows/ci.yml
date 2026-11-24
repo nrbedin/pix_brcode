@@ -22,4 +22,5 @@ jobs:
           cache: true
 
       - run: make deps FVM=
+      - run: make check-codegen FVM=
       - run: make check FVM=
