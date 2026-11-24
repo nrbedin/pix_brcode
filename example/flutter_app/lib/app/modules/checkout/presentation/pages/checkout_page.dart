@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import '../../../../core/formatters/currency_formatter.dart';
+import '../../../reader/presentation/pages/reader_page.dart';
 import '../controller/checkout_controller.dart';
 import '../mobx/checkout_state.dart';
 import '../widgets/amount_form.dart';
@@ -29,7 +30,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pagamento Pix')),
+      appBar: AppBar(
+        title: const Text('Pagamento Pix'),
+        actions: [
+          IconButton(
+            key: const Key('open-reader'),
+            tooltip: 'Ler QR Code Pix',
+            onPressed: () => Modular.to.pushNamed(ReaderPage.path),
+            icon: const Icon(Icons.qr_code_scanner),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
