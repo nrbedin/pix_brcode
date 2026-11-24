@@ -19,7 +19,8 @@ ANDROID_JDK ?= /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
 ANDROID_ENV := GRADLE_OPTS="-Dorg.gradle.java.home=$(ANDROID_JDK)"
 
 .DEFAULT_GOAL := help
-.PHONY: help setup deps format check-format analyze test test-app check cli \
+.PHONY: help setup deps codegen check-codegen format check-format analyze test \
+	test-app check cli \
 	app-run app-release-web app-serve-web check-android-jdk app-release-apk \
 	app-install-apk clean
 
@@ -37,13 +38,25 @@ deps: ## Baixa as dependências do pacote e do app
 	$(DART) pub get
 	cd $(APP_DIR) && $(FLUTTER) pub get
 
+codegen: ## Gera o código do MobX (*.g.dart) do app
+	cd $(APP_DIR) && $(DART) run build_runner build --delete-conflicting-outputs
+
+check-codegen: codegen ## Falha se o *.g.dart commitado estiver desatualizado
+	@git diff --exit-code -- '$(APP_DIR)/**/*.g.dart' || { \
+		echo "Código gerado desatualizado: rode 'make codegen' e commite."; \
+		exit 1; }
+
 # --- Qualidade --------------------------------------------------------------
 
-format: ## Formata todo o código
-	$(DART) format .
+# Arquivos .dart do projeto, sem os gerados pelo build_runner.
+DART_SOURCES = $(shell find . -name '*.dart' -not -name '*.g.dart' \
+	-not -path '*/.dart_tool/*' -not -path './.fvm/*' -not -path '*/build/*')
+
+format: ## Formata todo o código (menos o gerado)
+	$(DART) format $(DART_SOURCES)
 
 check-format: ## Falha se algum arquivo não estiver formatado
-	$(DART) format --output=none --set-exit-if-changed .
+	$(DART) format --output=none --set-exit-if-changed $(DART_SOURCES)
 
 analyze: ## Análise estática do pacote e do app
 	$(DART) analyze --fatal-infos

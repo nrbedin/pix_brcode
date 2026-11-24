@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_mobx: ^2.3.0
+  flutter_modular: ^5.0.3
+  mobx: ^2.5.0
   pix_brcode:
     path: ../..
   qr_flutter: ^4.1.0
@@ -17,6 +20,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  build_runner: ^2.4.15
+  mobx_codegen: ^2.7.1
+  fake_async: ^1.3.1
 
 flutter:
   uses-material-design: true

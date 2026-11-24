@@ -9,3 +9,4 @@
 - `PixPayload.parse` e `tryParse`: leitura do BR Code em `StaticPixPayload` ou `DynamicPixPayload`, com `PixParseException` indicando campo e posição.
 - Exemplo de linha de comando em `example/main.dart` para gerar e ler BR Codes.
 - App Flutter de exemplo em `example/flutter_app`: fluxo de pagamento Pix com backend simulado, validação do BR Code e QR com `qr_flutter`.
+- App Flutter de exemplo reestruturado em flutter_modular 5 + MobX (data/domain/presentation), com backend fake em JSON no formato da API Pix, etapas do pagamento e comprovante.
