@@ -96,6 +96,14 @@ O build Android usa o JDK 17 só no Gradle deste app (`brew install openjdk@17`)
 
 Rode `make` para ver todos os comandos. No VS Code, `.vscode/settings.json` já aponta a extensão Dart para o SDK do FVM.
 
+## Autora
+
+**Naiara Bedin**: desenvolvedora de software.
+
+- Portfólio: [nrbedin.github.io](https://nrbedin.github.io)
+- LinkedIn: [linkedin.com/in/naiara-bedin](https://www.linkedin.com/in/naiara-bedin)
+- GitHub: [@nrbedin](https://github.com/nrbedin)
+
 ## Licença
 
 MIT
